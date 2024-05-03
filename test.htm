@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <style>
+    .possession-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      position: relative;
+    }
+
+    .team {
+    width: 120px;
+    height: 2px;
+    z-index: 100000000000;
+    /* border-radius: 50%; */
+}
+
+    .team1 {
+      background-color: red;
+    }
+
+    .team2 {
+      background-color: blue;
+    }
+
+    .line {
+      width: 200px;
+      /* Adjust as needed */
+      height: 2px;
+      background-color: black;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  </style>
+  <div class="possession-container">
+    <div class="team team1"></div>
+    <div class="line"></div>
+    <div class="team team2"></div>
+  </div>
+
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,167 @@
+const express = require("express");
+const mysql = require("mysql");
+const cors = require("cors");
+const fs = require('fs');
+
+
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+app.use(cors( {
+
+        //origin: "http://127.0.0.1:5502",
+}
+));
+
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'ratuser',
+  password: 'Baliqis123@',
+  database: 'ratdb'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL database:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
+});
+
+
+app.post('/submit', (req, res) => {
+  const { address, referralId, referrals, treasures, twitter, team, task1, task2, task3, task4, task5, task6, task7, task8, task9 } = req.body;
+  const sql = 'INSERT INTO aval (address, referralId, referrals, treasures, twitter, team, task1, task2, task3, task4, task5, task6, task7, task8, task9) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  db.query(sql, [address, referralId, referrals, treasures, twitter, team, task1, task2, task3, task4, task5, task6, task7, task8, task9], (err, result) => {
+    if (err) {
+      console.error('Error inserting data into MySQL:', err);
+      res.status(500).send('Error inserting data into MySQL');
+      return;
+    }
+    console.log('Data inserted into MySQL');
+    res.status(200).send('Data inserted into MySQL');
+  });
+});
+
+
+app.get('/getdata', (req, res) => {
+    const { address } = req.query;
+
+    const sql = 'SELECT * FROM aval WHERE address = ?';
+
+    db.query(sql, [address], (err, result) => {
+        if (err) {
+          console.error('Error in fetching data from MySQL', err);
+          res.status(500).send('Error in fetching data from MySQL');
+          return;
+        }
+        console.log('Data fetched successfully:', result);
+        res.status(200).json(result);
+    });
+});
+
+
+
+app.get('/getRef', (req, res) => {
+  const { referralId } = req.query;
+
+  const sql = 'SELECT * FROM users WHERE referralId = ?';
+
+  db.query(sql, [referralId], (err, result) => {
+    if (err) {
+      console.error('Error in fetching data from MySQL:', err);
+      res.status(500).send('Error in fetching data from MySQL');
+      return;
+    }
+    console.log('Data fetched successfully');
+    res.status(200).send(result);
+  });
+});
+
+app.post('/updateReferrals', (req, res) => {
+    const { referralId, referrals, treasures } = req.body;
+  
+    const sql = 'UPDATE aval SET referrals = ?, treasures = ? WHERE referralId = ?';
+
+    console.log(treasures)
+  
+    db.query(sql, [referrals, treasures, referralId], (err, result) => {
+      if (err) {
+        console.error('Error updating data in MySQL:', err);
+        res.status(500).send('Error updating data in MySQL');
+        return;
+      }
+      if (result.affectedRows === 0) {
+        // Handle case where referralId was not found
+        res.status(404).send('ReferralId not found');
+        return;
+      }
+      console.log('Data updated in MySQL');
+      res.status(200).send('Data updated in MySQL');
+    });
+  });
+  
+
+
+app.post('/updateTress', (req, res) => {
+    const { referralId, treasures, task1, task2, task3, task4, task5, task6, task7, task8, task9 } = req.body;
+  
+    const sql = 'UPDATE aval SET treasures = ?, task1 = ?, task2 = ?, task3 = ?, task4 = ?, task5 = ?, task6 = ?, task7 = ?, task8 = ?, task9 = ? WHERE referralId = ?';
+  
+    db.query(sql, [treasures, task1, task2, task3, task4, task5, task6, task7, task8, task9, referralId], (err, result) => {
+      if (err) {
+        console.error('Error updating data in MySQL:', err);
+        res.status(500).send('Error updating data in MySQL');
+        return;
+      }
+      if (result.affectedRows === 0) {
+        // Handle case where referralId was not found
+        res.status(404).send('ReferralId not found');
+        return;
+      }
+      console.log('Data updated in MySQL');
+      res.status(200).send('Data updated in MySQL');
+    });
+  });
+  
+
+  app.get('/getTeam', (req, res) => {
+    const totalUsersSql = 'SELECT COUNT(*) AS total_users FROM aval';
+    const steveSql = 'SELECT COUNT(*) AS steve_count FROM aval WHERE team = ?';
+    const alexSql = 'SELECT COUNT(*) AS alex_count FROM aval WHERE team = ?';
+
+    db.query(totalUsersSql, (err, totalUsersResult) => {
+        if (err) {
+            console.error('Error in fetching total users count from MySQL', err);
+            res.status(500).send('Error in fetching data from MySQL');
+            return;
+        }
+
+        db.query(steveSql, ['Steve'], (err, steveResult) => {
+            if (err) {
+                console.error('Error in fetching Steve count from MySQL', err);
+                res.status(500).send('Error in fetching data from MySQL');
+                return;
+            }
+
+            db.query(alexSql, ['Alex'], (err, alexResult) => {
+                if (err) {
+                    console.error('Error in fetching Alex count from MySQL', err);
+                    res.status(500).send('Error in fetching data from MySQL');
+                    return;
+                }
+
+                const data = {
+                    total_users: totalUsersResult[0].total_users,
+                    steve_count: steveResult[0].steve_count,
+                    alex_count: alexResult[0].alex_count
+                };
+
+                console.log('Data fetched successfully:', data);
+                res.status(200).json(data);
+            });
+        });
+    });
+});
